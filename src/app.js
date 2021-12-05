@@ -1,5 +1,5 @@
 import express from "express";
-import { sendWhatsappSessionMessage, sendWhatsappShipmentTemplateMsg, generateQueryReplies } from "./helpers.js";
+import {sendWhatsappSessionMessage, sendWhatsappShipmentTemplateMsg, generateQueryReplies} from './whatsapp.js'
 import chalk from "chalk";
 
 const queryBot = express();
