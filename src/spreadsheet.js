@@ -63,7 +63,7 @@ export const getDataFromSheetByOrderId = async function (sheetName, order_id , r
         }
         return {data, authorized: true, dataFound:true, status:200};
     } catch (err) {
-        console.log(err)
+        // console.log(err)
         return err;
     }
 }
@@ -92,7 +92,7 @@ export const getDataFromSheetByPhone = async function(sheetName, phone, receiver
         }
         if(rowData !== 'all') {
             rowData = rowData.split(',').map(neededData => neededData.trim());
-            console.log(rowData);
+            // console.log(rowData);
             data = data.map(rowObj => {
                     const obj = {};
                     rowData.forEach(neededData => {
@@ -104,7 +104,7 @@ export const getDataFromSheetByPhone = async function(sheetName, phone, receiver
         return {data, authorized: true, dataFound:true, status:200};
     
     } catch(err) {
-        console.log(err);
+        // console.log(err);
         return err;
 
     }

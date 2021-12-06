@@ -18,7 +18,7 @@ queryBot.post('/whatsapp/incoming', async function (req, res) {
         // console.log(messageResult);
         res.status(200).send();
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(400).send();
     }
 
@@ -32,10 +32,10 @@ queryBot.post('/whatsapp/fallback/incoming', async function (req, res) {
         const receivedMessage = data.Body;
         const sessionMessage = await generateQueryReplies(receivedMessage, receiverPhone);
         const messageResult = await sendWhatsappSessionMessage(sessionMessage, receiverPhone);
-        console.log(messageResult);
+        // console.log(messageResult);
         res.status(200).send();
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(400).send();
     }
 
@@ -47,13 +47,14 @@ queryBot.post('/whatsapp/status', async function (req, res) {
             const data = req.body;
             const phone = data.To.split(':')[1].slice(-10);
             const status = data.MessageStatus;
-            console.log('WHATSAPP STATUS\n---------------\n');
-            console.log(chalk`${phone} ------ {green ${status}}`);
+            // console.log('WHATSAPP STATUS\n---------------\n');
+            // console.log(chalk`${phone} ------ {green ${status}}`);
         }
         res.status(200).send();
     }
     catch (err) {
-        console.log(err);
+        // console.log(err);
+        res.status(400).send();
     }
 })
 
@@ -63,13 +64,14 @@ queryBot.post('/whatsapp/fallback/status',function(req,res){
             const data = req.body;
             const phone = data.To.split(':')[1].slice(-10);
             const status = data.MessageStatus;
-            console.log('WHATSAPP STATUS\n---------------\n');
-            console.log(chalk`${phone} ------ {green ${status}}`);
+            // console.log('WHATSAPP STATUS\n---------------\n');
+            // console.log(chalk`${phone} ------ {green ${status}}`);
         }
         res.status(200).send();
     }
     catch (err) {
-        console.log(err);
+        // console.log(err);
+        res.status(400).send();
     }
 })
 
@@ -77,7 +79,7 @@ queryBot.post('/whatsapp/sendwhatsapp', async function (req, res) {
     try {
         // const doc = await googleSpreadsheetInit();
         const data = req.body.data;
-        console.log(data);
+        // console.log(data);
         let result;
         for (let i = 0; i < data.length; i++) {
             result = await sendWhatsappShipmentTemplateMsg({
@@ -90,15 +92,15 @@ queryBot.post('/whatsapp/sendwhatsapp', async function (req, res) {
                 feedback_email: 'shirtonomics@gmail.com'
             })
             if (result.status === 'queued') {
-                // console.log(chalk`{yellow ${data[i].order_id}} ------ ${data[i].customer_phone} ------ {green ${data[i].message}}`)
+                console.log(chalk`{yellow ${data[i].order_id}} ------ ${data[i].customer_phone} ------ {green queued}`)
                 data[i].whatsapp_status = 'Sent';
                 // populateWhatsappStatusSheet(doc, data);
             }
         }
         res.status(200).send("This is whatsapp message-sending endpoint.");
-        console.log(result);
+        // console.log(result);
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(400).send();
     }
 })

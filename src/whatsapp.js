@@ -38,7 +38,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
     try{
         let query;
         let data;
-        console.log(queryString);
+        // console.log(queryString);
         if(queryString.includes(':')){
             queryString = queryString.split(':').map(el=>el.trim())
             query = queryString[0];
@@ -58,7 +58,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             }
             else if(result.status === 404){
                 const check = await getDataFromSheetByPhone('Not Filled', receiverPhone.slice(-10), receiverPhone, 'customer_phone');
-                console.log(check);
+                // console.log(check);
                 if(check.dataFound){
                     return `Currently none of your orders has not been processed yet. We'll send you an email/sms notification when we get your order ready for shipment.`;
                 }
@@ -77,13 +77,13 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
         else if(query === '1' && data ){
             const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone, 'consignment_no');
-            console.log(result);
+            // console.log(result);
             if(result.status === 401 ){
                 return 'Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3. '
             }
             else if(result.status === 404){
                 const check = await getDataFromSheetByOrderId('Not Filled', data, receiverPhone, 'customer_phone');
-                console.log(check);
+                // console.log(check);
                 if(check.dataFound){
                     return `Your order has not been processed yet. We'll send you an email/sms notification when we get your order ready for shipment.`;
                 }
@@ -95,7 +95,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `Something went wrong:(...we'll get back to you later`;
             }
             else{
-                console.log(result)
+                // console.log(result)
                 return `Your order has been shipped. You can track your order by entering the consignment no. ${result.data.consignment_no} into the IndiaPost portal (www.indiapost.gov.in).`
             }
         }
@@ -150,7 +150,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             return 'Enter a valid query.'
         }
     } catch(err){
-        console.log(err);
+        // console.log(err);
         throw err;
     }
 }
