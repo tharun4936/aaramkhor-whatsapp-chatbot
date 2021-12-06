@@ -34,6 +34,8 @@ export const sendWhatsappSessionMessage = async function (message, receiver) {
     }
 }
 
+const isNumeric = (string => !isNaN(string));
+
 export const generateQueryReplies = async function(queryString, receiverPhone){
     try{
         let query;
@@ -75,7 +77,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`;
             }
         }
-        else if(query === '1' && data ){
+        else if(query === '1' && isNumeric(data) ){
             const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone, 'consignment_no');
             // console.log(result);
             if(result.status === 401 ){
@@ -99,10 +101,10 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `Your order has been shipped. You can track your order by entering the consignment no. ${result.data.consignment_no} into the IndiaPost portal (www.indiapost.gov.in).`
             }
         }
-        else if(query === '2' && data){
+        else if(query === '2' && isNumeric(data)){
             return 'Your order will be delivered within 5-7 business days.'
         }
-        else if(query === '3' && data){
+        else if(query === '3' && isNumeric(data)){
             const result = await getDataFromSheetByPhone('Not Filled',data, receiverPhone, 'order_id');
             if(result.status === 401){
                 return 'Sorry, the order details for the given phone number is not available. Please enter the number you have given for receiving shipment updates.';
@@ -121,15 +123,18 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `The following orders with corresponding order IDs has been registered but not ready for shipment yet:\n\n${order_ids}\n\nPlease cross-check whether the following orders are there in the orders history in www.aaramkhor.com/account. If the expected order is not present, please ping to this number with the screenshot of the transaction.\n+917573075762`;
             }
         }
-        else if(query === '4' && data){
+        else if(query === '4' && (data === 't-shirt' || data ==='hoodie')){
             if(data === 't-shirt'){
                 return 'Our T-Shirts are 100% pure 180 gsm biowashed preshrunk cotton. Our prints are eco-friendly digital water-based inks that are color-vibrant and antifading.'
             }
             else if(data === 'hoodie'){
                 return 'Our Hoodies are 320 gsm biowashed cotton with belly pocket, hood, without zipper and with brushed fleece inside. Our prints are eco-friendly digital water-based inks that are color-vibrant and antifading.'
             }
+            else{
+
+            }
         }
-        else if(query === '5' && data){
+        else if(query === '5' && (data === 't-shirt' || data === 'hoodie' || data === 'crop-top')){
             if(data === 't-shirt'){
                 return 'Please note that in case of exchange, you’ll have to ship the product to our address as we don’t have pickup facility with our courier. The address is\n“VKAR Ecommerce Pvt Ltd, Plot No.10, 2nd Cross Street, 1st Main Road, AG’s Office Phase Colony, Sabari Nagar Extn, Mugalivakkam, Chennai - 600125. Ph:8160451369”\nPlease enter your order ID on the parcel. Once we receive the item, we will initiate reshipment of the updated size. Max exchange qty is 1 piece. Please ship through India Post. It will cost Rs.35 only.'
             }
@@ -137,7 +142,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `We don’t offer a return and exchange policy for hoodie/crop top unless there’s a product defect. Please share complete proof of material/ink defect to register a return request.`
             }
         }
-        else if(query === '6' && data){
+        else if(query === '6' && isNumeric(data)){
             return `We can offer you a discount of Rs ${100*(Number(data)-1)}. Please get in touch for additional queries!`
         }
         else if(query == '7'){
