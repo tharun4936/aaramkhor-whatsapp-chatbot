@@ -121,6 +121,7 @@ export const getLongitudeByPincode = async function(pincode){
             }
         })
         const longitude = data.find(obj => obj.pincode === pincode).longitude;
+        console.log(longitude);
         if(longitude) return longitude;
         else return false;
     }
