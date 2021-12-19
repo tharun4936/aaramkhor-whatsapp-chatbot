@@ -102,9 +102,12 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             }
         }
         else if(query === '2' && isNumeric(data)){
-            const longitude = await getLongitudeByPincode(data);
-            if(longitude) return `Your order will be delivered within ${longitude}. `;
-            else return 'Something went wrong! Try this query after some time.'
+            const result = await getLongitudeByPincode(data);
+
+            if(result.dataFound) return `Your order will be delivered within ${result.longitude}. `;
+
+            else return `Please enter a valid pincode!`;
+
         }
         else if(query === '3' && isNumeric(data)){
             const result = await getDataFromSheetByPhone('Not Filled',data, receiverPhone, 'order_id');

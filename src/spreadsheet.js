@@ -120,10 +120,10 @@ export const getLongitudeByPincode = async function(pincode){
             }
         })
         const longitude = data.find(obj => obj.pincode === pincode).longitude;
-        if(longitude) return longitude;
-        else return false;
+        if(!longitude) throw {error:'Pincode not found',dataFound:false, status:404}; 
+        else return {longitude, dataFound:true, status: 200};
     }
     catch(err){
-        throw err;
+        return err;
     }
 }
