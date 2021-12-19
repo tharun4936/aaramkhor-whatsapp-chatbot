@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import e from 'express';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
 dotenv.config();
@@ -107,5 +108,23 @@ export const getDataFromSheetByPhone = async function(sheetName, phone, receiver
         // console.log(err);
         return err;
 
+    }
+}
+
+export const getLongitudeByPincode = async function(pincode){
+    try{
+        const rows = await loadSheetData('Pincodes');
+        let data = rows.map(rowObj => {
+            return {
+                pincode:rowObj.Pincode,
+                longitude: rowObj.Longitude
+            }
+        })
+        const longitude = data.find(obj => obj.pincode === pincode).longitude;
+        if(longitude) return longitude;
+        else return false;
+    }
+    catch(err){
+        throw err;
     }
 }

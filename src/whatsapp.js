@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import twilio from "twilio";
-import {getDataFromSheetByOrderId, getDataFromSheetByPhone} from './spreadsheet.js';
+import {getDataFromSheetByOrderId, getDataFromSheetByPhone, getLongitudeByPincode} from './spreadsheet.js';
 
 dotenv.config();
 
@@ -102,7 +102,9 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             }
         }
         else if(query === '2' && isNumeric(data)){
-            return 'Your order will be delivered within 5-7 business days.'
+            const longitude = getLongitudeByPincode(data);
+            if(longitude) return `Your order will be delivered within ${longitude}. `;
+            else return 'Something went wrong! Try this query after some time.'
         }
         else if(query === '3' && isNumeric(data)){
             const result = await getDataFromSheetByPhone('Not Filled',data, receiverPhone, 'order_id');
@@ -110,10 +112,21 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return 'Sorry, the order details for the given phone number is not available. Please enter the number you have given for receiving shipment updates.';
             }
             else if(result.status === 404){
-                return 'Sorry, the order has not been registered. Try to order the item again. If payment is made, please send the screenshot of the transaction to +917573075762.'  
+                const result = getDataFromSheetByPhone('Filled', data, receiverPhone,'order_id');
+                if(result.status === 404){
+                    return 'Sorry, the order has not been registered. Try to order the item again. If payment is made, please send the screenshot of the transaction to +917573075762.'  
+                }
+                else if(result.status === 500){
+                    return `Something went wrong...we'll get back to you later:(`;
+                }
+                else{
+                    let order_ids = "";
+                    result.data.forEach(dataObj => order_ids += (' ' + dataObj.order_id))
+                    return `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`;
+                }
             }
             else if(result.status === 500){
-                return `Something went wrong...we'll get back to you later:(`;;
+                return `Something went wrong...we'll get back to you later:(`;
             }
             else{
                 let order_ids = "";
@@ -136,20 +149,20 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
         else if(query === '5' && (data === 't-shirt' || data === 'hoodie' || data === 'crop-top')){
             if(data === 't-shirt'){
-                return 'Please note that in case of exchange, you’ll have to ship the product to our address as we don’t have pickup facility with our courier. The address is\n“VKAR Ecommerce Pvt Ltd, Plot No.10, 2nd Cross Street, 1st Main Road, AG’s Office Phase Colony, Sabari Nagar Extn, Mugalivakkam, Chennai - 600125. Ph:8160451369”\nPlease enter your order ID on the parcel. Once we receive the item, we will initiate reshipment of the updated size. Max exchange qty is 1 piece. Please ship through India Post. It will cost Rs.35 only.'
+                return 'Please note that in case of exchange, you’ll have to ship the product to our address as we don’t have pickup facility with our courier. The address is\n“VKAR Ecommerce Pvt Ltd, Plot No.10, 2nd Cross Street, 1st Main Road, AG’s Office Phase Colony, Sabari Nagar Extn, Mugalivakkam, Chennai - 600125. Ph:8160451369”\nPlease enter your order ID on the parcel. Once we receive the item, we will initiate reshipment of the updated size. Max exchange qty is 1 piece. Please ship through IndiaPost. It will cost Rs.35 only. In case you have any additional queries, please e-mail with complete details to shirtonomics@gmail.com'
             }
             else if(data === 'crop-top' || data === 'hoodie'){
-                return `We don’t offer a return and exchange policy for hoodie/crop top unless there’s a product defect. Please share complete proof of material/ink defect to register a return request.`
+                return `We don’t offer a return and exchange policy for hoodie/crop top unless there’s a product defect. Please share complete proof of material/ink defect to shirtonomics@gmail.com to register a special request.`
             }
         }
         else if(query === '6' && isNumeric(data)){
             return `We can offer you a discount of Rs ${100*(Number(data)-1)}. Please get in touch for additional queries!`
         }
         else if(query == '7'){
-            return "https://www.aaramkhor.com/collections/design-your-own\n\nTo design your T-shirt, please click on the above link, select your product, color and size and click “Customize Now”. It will open our design tool when you can upload your image or create your design on our tool. If you face any difficulty, please ping here...we’ll help you out to get what you exactly want!"
+            return "https://www.aaramkhor.com/collections/design-your-own\n\nTo design your T-shirt, please click on the above link, select your product, color and size and click “Customize Now”. It will open our design tool where you can upload your image or create your design on our tool. If you face any difficulty, please ping on +918160451369. We’ll help you out to get what you exactly want!"
         }
         else if(query === '8'){
-            return 'COD is currently available only on select merchandise and in certain locations. Our executive will get in touch with you shortly on this.'
+            return 'COD is currently available only on select merchandise. On the product pages of these select merchandise, you’ll find the option to go for COD. Please note that you’ll have to additional Rs.49 upfront COD handling charges that couriers charge for COD service. Also, no discount codes are applicable on COD orders.';
         }
         else{
             return 'Enter a valid query.'
