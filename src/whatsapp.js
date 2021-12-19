@@ -102,7 +102,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             }
         }
         else if(query === '2' && isNumeric(data)){
-            const longitude = getLongitudeByPincode(data);
+            const longitude = await getLongitudeByPincode(data);
             if(longitude) return `Your order will be delivered within ${longitude}. `;
             else return 'Something went wrong! Try this query after some time.'
         }
