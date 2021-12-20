@@ -33,21 +33,27 @@ const loadSheetData = async function(sheetName){
 
 export const getDataFromSheetByOrderId = async function (sheetName, order_id , receiverPhone, rowData = 'all') {
     try {
-
+        let data;
         const rows = await loadSheetData(sheetName);
-        let data = rows.map(rowObj => {
-                return {
-                    order_id: rowObj.Order_Number,
-                    order: rowObj.Order.split(' ~ ').map(orderq => orderq.trim()),
-                    order_quantity: rowObj.Order_Quantity.split(' ~ ').map(orderq => orderq.trim()),
-                    customer_name: rowObj.Customer_Name,
-                    customer_phone: rowObj.Customer_Phone,
-                    customer_email: rowObj.Customer_Email,
-                    consignment_no: rowObj.Tracking_Number,
-                    created_at: rowObj.Created_At,
-                    tracking_link: rowObj.Tracking_Link
+        // const sample = rows.find(rowObj => rowObj.Order_Number === order_id)
+        // console.log(sample.Order_Number);
+        let dataSheet = rows.find(rowObj => rowObj.Order_Number == order_id);
+        console.log(dataSheet)
+        if(dataSheet){
+            if(dataSheet.Customer_Phone)
+                data = {
+                    order_id: dataSheet.Order_Number,
+                    order: dataSheet.Order.split(' ~ ').map(orderq => orderq.trim()),
+                    order_quantity: dataSheet.Order_Quantity.split(' ~ ').map(orderq => orderq.trim()),
+                    customer_name: dataSheet.Customer_Name,
+                    customer_phone: dataSheet.Customer_Phone,
+                    customer_email: dataSheet.Customer_Email,
+                    consignment_no: dataSheet.Tracking_Number,
+                    created_at: dataSheet.Created_At,
+                    tracking_link: dataSheet.Tracking_Link
                 }
-        }).find(rowObj => rowObj.order_id === order_id)
+             console.log(data);
+        }
         if(!data){
             throw {error: 'Data not found!', dataFound: false, status:404}
         }
