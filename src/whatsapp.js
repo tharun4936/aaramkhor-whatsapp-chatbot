@@ -81,13 +81,13 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
 
         else if(query === '1' && isNumeric(data) ){
-            const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone, 'consignment_no');
+            const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone.slice(-10), 'consignment_no');
             console.log(result);
             if(result.status === 401 ){
                 return 'Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3. '
             }
             else if(result.status === 404){
-                const check = await getDataFromSheetByOrderId('Logistics', data, receiverPhone, 'customer_phone');
+                const check = await getDataFromSheetByOrderId('Logistics', data, receiverPhone.slice(-10), 'customer_phone');
                 console.log(check);
                 if(check.dataFound){
                     return `Your order has not been processed yet. We'll send you an email/sms notification when we get your order ready for shipment.`;
