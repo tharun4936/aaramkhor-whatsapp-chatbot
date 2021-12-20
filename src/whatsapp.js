@@ -106,6 +106,9 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
 
         else if(query === '2' && isNumeric(data)){
+            
+            if(data.length !== 6 ) return `Please enter a valid pincode.`;
+
             const result = await getLongitudeByPincode(data);
 
             if(result.dataFound) return `If you order today, your order will be delivered within ${result.longitude}. `;
