@@ -110,7 +110,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
 
             if(result.dataFound) return `If you order today, your order will be delivered within ${result.longitude}. `;
 
-            else return `Please enter a valid pincode!`;
+            else return `If your order today, your order will be be delivered within 6-10 days`;
 
         }
 
