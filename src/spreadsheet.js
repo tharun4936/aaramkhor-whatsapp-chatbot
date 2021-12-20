@@ -38,9 +38,9 @@ export const getDataFromSheetByOrderId = async function (sheetName, order_id , r
         // const sample = rows.find(rowObj => rowObj.Order_Number === order_id)
         // console.log(sample.Order_Number);
         let dataSheet = rows.find(rowObj => rowObj.Order_Number == order_id);
-        console.log(dataSheet)
+        // console.log(dataSheet)
         if(dataSheet){
-            if(dataSheet.Customer_Phone)
+            if(dataSheet.Customer_Phone){
                 data = {
                     order_id: dataSheet.Order_Number,
                     order: dataSheet.Order.split(' ~ ').map(orderq => orderq.trim()),
@@ -52,7 +52,8 @@ export const getDataFromSheetByOrderId = async function (sheetName, order_id , r
                     created_at: dataSheet.Created_At,
                     tracking_link: dataSheet.Tracking_Link
                 }
-             console.log(data);
+                if(sheetName === 'Logistics') data.expected_shipping_date = dataSheet.Expected_Shipping_Date;
+            }
         }
         if(!data){
             throw {error: 'Data not found!', dataFound: false, status:404}
@@ -80,25 +81,37 @@ export const getDataFromSheetByPhone = async function(sheetName, phone, receiver
             throw {error:'Not authorized!', authorized: false, dataFound:false, status:401}
         }
         const rows = await loadSheetData(sheetName);
-        let data = rows.map(rowObj => {
-                return {
-                order_id: rowObj.Order_Number,
-                order: rowObj.Order.split(' ~ ').map(orderq => orderq.trim()),
-                order_quantity: rowObj.Order_Quantity.split(' ~ ').map(orderq => orderq.trim()),
-                customer_name: rowObj.Customer_Name,
-                customer_phone: rowObj.Customer_Phone,
-                customer_email: rowObj.Customer_Email,
-                consignment_no: rowObj.Tracking_Number,
-                created_at: rowObj.Created_At,
-                tracking_link: rowObj.Tracking_Link
-            }
-        }).filter(rowObj => rowObj.customer_phone === phone);
+        let data;
+        let dataSheet = rows.filter(rowObj => rowObj.Customer_Phone === phone);
+        if(dataSheet){
+            data = dataSheet.map(rowObj => {
+                const obj =  {
+                    order_id: rowObj.Order_Number,
+                    order: rowObj.Order.split(' ~ ').map(orderq => orderq.trim()),
+                    order_quantity: rowObj.Order_Quantity.split(' ~ ').map(orderq => orderq.trim()),
+                    customer_name: rowObj.Customer_Name,
+                    customer_phone: rowObj.Customer_Phone,
+                    customer_email: rowObj.Customer_Email,
+                    consignment_no: rowObj.Tracking_Number,
+                    created_at: rowObj.Created_At,
+                    tracking_link: rowObj.Tracking_Link
+                }
+                if(sheetName === 'Logistics')
+                    obj.expected_shipping_date = rowObj.Expected_Shipping_Date;
+                return obj;
+            });
+        }
+
+        
         if(!data || data.length === 0){
             throw {error:'Data not found!', dataFound:false, status:404};
         }
         if(rowData !== 'all') {
             rowData = rowData.split(',').map(neededData => neededData.trim());
             // console.log(rowData);
+            if(rowData.includes('expected_shipping_data') && sheetName === 'Not Filled'){
+                throw {error:'Expected Shipping date is not available from the specified Sheet', dataFound:false, status:404};
+            }
             data = data.map(rowObj => {
                     const obj = {};
                     rowData.forEach(neededData => {

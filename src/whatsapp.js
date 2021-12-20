@@ -82,18 +82,18 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
 
         else if(query === '1' && isNumeric(data) ){
             const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone.slice(-10), 'consignment_no');
-            console.log(result);
+            // console.log(result);
             if(result.status === 401 ){
                 return 'Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3. '
             }
             else if(result.status === 404){
-                const check = await getDataFromSheetByOrderId('Logistics', data, receiverPhone.slice(-10), 'customer_phone');
-                console.log(check);
-                if(check.dataFound){
-                    return `Your order has not been processed yet. We'll send you an email/sms notification when we get your order ready for shipment.`;
+                const result2 = await getDataFromSheetByOrderId('Logistics', data, receiverPhone.slice(-10), 'customer_phone, expected_shipping_date');
+                // console.log(result2);
+                if(result2.dataFound){
+                    return `Your order is expected to be shipped on ${result2.data.expected_shipping_date}. You’ll get a tracking ID via sms, email and WhatsApp once it ships.`;
                 }
                 else{
-                    return `Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3.`
+                    return `Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.`
                 }
             }
             else if(result.status === 500){
@@ -115,65 +115,34 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
 
         else if(query === '3' && isNumeric(data)){
-            const result  = await getDataFromSheetByPhone('Filled', data, receiverPhone, 'order_id');
-            let message = '';
-            if(result.status === 401)
-                return 'Sorry, the order details for the given phone number is not available. Please enter the number you have given for receiving shipment updates.';
-            else if(result.status === 404){
-                message += 'None of your order has been shipped.';
-            }
-            else if(result.status === 200){
-                let order_ids = "";
-                result.data.forEach(dataObj => order_ids += (' ' + dataObj.order_id))
-                message += `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`;
-            }
-            else{
-                return 'Something went wrong! Try again after sometime.';
-            }
-
+            const result = await getDataFromSheetByPhone('Filled', data, receiverPhone, 'order_id');
             const result2 = await getDataFromSheetByPhone('Logistics', data, receiverPhone, 'order_id');
-            if(result2.status === 404){
-                message += 'No orders has been registered\n\nTry to order the item again. If payment is made, please send the screenshot of the transaction to +917573075762.'
+            let order_ids = [];
+            if(result.status === 200) {
+                result.data.forEach(dataObj => order_ids.push(dataObj.order_id));
             }
-            else if(result.status === 200){
-                let order_ids = "";
-                result.data.forEach(dataObj=>{
-                    order_ids+= (' ' + dataObj.order_id);
-                });
-                message += `The following orders with corresponding order IDs has been registered but not ready for shipment yet:\n\n${order_ids}\n\nPlease cross-check whether the following orders are there in the orders history in www.aaramkhor.com/account. If the expected order is not present, please ping to this number with the screenshot of the transaction.\n+917573075762`;
+            if(result2.status === 200){
+                result2.data.forEach(dataObj => order_ids.push(dataObj.order_id));
             }
-            else {
+            if(result.status === 401 || result2.status === 401)
+                return 'Sorry, there is no order record for the given phone number. Please re-check and enter the number you have given for receiving shipment updates.\n\nIf you’re sure that you have indeed provided the correct phone number, pls mail your transaction ID and transaction screenshot with the name you entered at checkout to shirtonomics@gmail.com. We will check and get back to you in 24-48 hours.';
+            
+            if((result.status === 404 && result2.status === 404) || order_ids.length === 0){
+                return 'Sorry, there is no order record for the given phone number. Please re-check and enter the number you have given for receiving shipment updates.\n\nIf you’re sure that you have indeed provided the correct phone number, pls mail your transaction ID and transaction screenshot with the name you entered at checkout to shirtonomics@gmail.com. We will check and get back to you in 24-48 hours.';
+            }
+            if(result.status === 500 || result.status === 500){
                 return 'Something went wrong! Try again after sometime.';
             }
-
-                // const result = await getDataFromSheetByPhone('Filled',data, receiverPhone, 'order_id');
-            // if(result.status === 401){
-            //     return 'Sorry, the order details for the given phone number is not available. Please enter the number you have given for receiving shipment updates.';
-            // }
-            // else if(result.status === 404){
-            //     const result = getDataFromSheetByPhone('Logistics', data, receiverPhone,'order_id');
-            //     if(result.status === 404){
-            //         return 'Sorry, the order has not been registered. Try to order the item again. If payment is made, please send the screenshot of the transaction to +917573075762.'  
-            //     }
-            //     else if(result.status === 500){
-            //         return `Something went wrong...we'll get back to you later:(`;
-            //     }
-            //     else{
-            //         let order_ids = "";
-            //         result.data.forEach(dataObj => order_ids += (' ' + dataObj.order_id))
-            //         return `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`;
-            //     }
-            // }
-            // else if(result.status === 500){
-            //     return `Something went wrong...we'll get back to you later:(`;
-            // }
-            // else{
-            //     let order_ids = "";
-            //     result.data.forEach(dataObj=>{
-            //         order_ids+= (' ' + dataObj.order_id);
-            //     });
-            //     return `The following orders with corresponding order IDs has been registered but not ready for shipment yet:\n\n${order_ids}\n\nPlease cross-check whether the following orders are there in the orders history in www.aaramkhor.com/account. If the expected order is not present, please ping to this number with the screenshot of the transaction.\n+917573075762`;
-            // }
+            // console.log(order_ids);
+        
+            let message = 'The following orders with corresponding order IDs has been successfully registered.\n\n';
+            order_ids.forEach((order_id) => {
+                message += (order_id + '\n');
+            })
+            message += '\nPlease cross-check whether the following orders are there in the orders history in www.aaramkhor.com/account. If the expected order is not present, please send a mail attached with screenshot of the transaction to shirtonomics@gmail.com';
+            return message;
+        
+            
         }
 
         else if(query === '4' && (data === 't-shirt' || data ==='hoodie')){
@@ -182,9 +151,6 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             }
             else if(data === 'hoodie'){
                 return 'Our Hoodies are 320 gsm biowashed cotton with belly pocket, hood, without zipper and with brushed fleece inside. Our prints are eco-friendly digital water-based inks that are color-vibrant and antifading.'
-            }
-            else{
-
             }
         }
 
@@ -198,7 +164,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
         }
 
         else if(query === '6' && isNumeric(data)){
-            return `We can offer you a discount of Rs. ${100*(Number(data)-1)}. Please get in touch for additional queries!`
+            return `We can offer you a discount of Rs. ${100*(Number(data)-1)}. Please get in touch on Whatsapp on +918160451369 for additional queries!`
         }
 
         else if(query == '7'){
@@ -209,7 +175,7 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             return 'COD is currently available only on select merchandise. On the product pages of these select merchandise, you’ll find the option to go for COD. Please note that you’ll have to additional Rs.49 upfront COD handling charges that couriers charge for COD service. Also, no discount codes are applicable on COD orders.';
         }
         else{
-            return 'Enter a valid query.'
+            return 'Please enter a valid query.'
         }
     } catch(err){
         // console.log(err);
