@@ -62,13 +62,17 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3.` + "\n\n" + disclaimer;
             }
             else if(result.status === 404){
-                const check = await getDataFromSheetByPhone('Logistics', receiverPhone.slice(-10), receiverPhone, 'customer_phone');
+                const check = await getDataFromSheetByPhone('Logistics', receiverPhone.slice(-10), receiverPhone, 'order_id,expected_shipping_date');
                 // console.log(check);
                 if(check.dataFound){
-                    return `Currently none of your orders has not been processed yet. We'll send you an email/sms notification when we get your order ready for shipment.` + "\n\n" + disclaimer;
+                    let orderIdWithETD = "";
+                    check.data.forEach(dataObj => {
+                        orderIdWithETD += `${dataObj.order_id} - ${dataObj.expected_shipping_date}\n`;
+                    })
+                    return `The following are your orders and their expected shipping dates.\n\n` + orderIdWithETD + `\nWe'll send you an email/sms notification when we get your order ready for shipment.` + "\n\n" + disclaimer;
                 }
                 else{
-                    return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3.` + "\n\n" + disclaimer;
+                    return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.` + "\n\n" + disclaimer;
                 }
             }
             else if(result.status === 500){
