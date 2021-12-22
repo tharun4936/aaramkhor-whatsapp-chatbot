@@ -56,34 +56,34 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
             return `This chat window is completely automated. It will answer ONLY the following list of queries. For other queries, please ping +918160451369 on Whatsapp or email your query to shirtonomics@gmail.com\n\n1) Track my order - pls type "1:" and your order number. Eg -1:9716\n2) I want to place an order, but I want to know how long it will take to get delivered -  Pls type "2:"followed by your pincode. E.g. - 2:400067\n3) I have made a successful payment, but I don't have any order details - Pls type "3:" followed by the number you have given at checkout shipping address.\n4) I want to know about quality of your product" - Pls type "4:" followed by the product. Eg: 4:t-shirt OR 4:hoodie \n5) I want to know about return & exchange policy: Pls type "5:" followed by product. Eg: 5:t-shirt or 5:crop-top \n6) I want buy T-Shirts in Bulk - what discount will i get? - Pls type 6: followed by the QTY of tshirts you're looking to buy. Eg: 6:10\n7) I want to customize my design * - pls type *7\n8) I want to buy on COD, but it’s not available - pls type 8 followed by product. Eg. 8: physics T-shirt\n\n_PS: If you don't get the desired answer to your query, this chat service won't be able to assist you further - we request that you email your issue to shirtonomics@gmail.com or Whatsapp to +918160451369 - we will get back within 24 hours._`
         }
 
-        else if(query.toLowerCase() === 'order status'){
-            const result = await getDataFromSheetByPhone('Filled', receiverPhone.slice(-10), receiverPhone, 'order_id');
-            if(result.status === 401){
-                return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3.` + "\n\n" + disclaimer;
-            }
-            else if(result.status === 404){
-                const check = await getDataFromSheetByPhone('Logistics', receiverPhone.slice(-10), receiverPhone, 'order_id,expected_shipping_date');
-                // console.log(check);
-                if(check.dataFound){
-                    let orderIdWithETD = "";
-                    check.data.forEach(dataObj => {
-                        orderIdWithETD += `${dataObj.order_id} - ${dataObj.expected_shipping_date}\n`;
-                    })
-                    return `The following are your orders and their expected shipping dates.\n\n` + orderIdWithETD + `\nWe'll send you an email/sms notification when we get your order ready for shipment.` + "\n\n" + disclaimer;
-                }
-                else{
-                    return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.` + "\n\n" + disclaimer;
-                }
-            }
-            else if(result.status === 500){
-                return `Something went wrong:(...we'll get back to you later` + "\n\n" + disclaimer;
-            }
-            else{
-                let order_ids = "";
-                result.data.forEach(dataObj => order_ids += (' ' + dataObj.order_id))
-                return `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`  + "\n\n" + disclaimer;
-            }
-        }
+        // else if(query.toLowerCase() === 'order status'){
+        //     const result = await getDataFromSheetByPhone('Filled', receiverPhone.slice(-10), receiverPhone, 'order_id');
+        //     if(result.status === 401){
+        //         return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please mention query 3.` + "\n\n" + disclaimer;
+        //     }
+        //     else if(result.status === 404){
+        //         const check = await getDataFromSheetByPhone('Logistics', receiverPhone.slice(-10), receiverPhone, 'order_id,expected_shipping_date');
+        //         // console.log(check);
+        //         if(check.dataFound){
+        //             let orderIdWithETD = "";
+        //             check.data.forEach(dataObj => {
+        //                 orderIdWithETD += `${dataObj.order_id} - ${dataObj.expected_shipping_date}\n`;
+        //             })
+        //             return `The following are your orders and their expected shipping dates.\n\n` + orderIdWithETD + `\nWe'll send you an email/sms notification when we get your order ready for shipment.` + "\n\n" + disclaimer;
+        //         }
+        //         else{
+        //             return `Sorry, the order status is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.` + "\n\n" + disclaimer;
+        //         }
+        //     }
+        //     else if(result.status === 500){
+        //         return `Something went wrong:(...we'll get back to you later` + "\n\n" + disclaimer;
+        //     }
+        //     else{
+        //         let order_ids = "";
+        //         result.data.forEach(dataObj => order_ids += (' ' + dataObj.order_id))
+        //         return `The following orders with corresponding order IDs has been processed and shipped:\n\n${order_ids}\n\nMention your order ID with query 1 to know tracking number. You can track your order by entering the tracking number or consignment number into the official IndiaPost portal (www.indiapost.gov.in)`  + "\n\n" + disclaimer;
+        //     }
+        // }
 
         else if(query === '1' && isNumeric(data) ){
             const result = await getDataFromSheetByOrderId('Filled', data, receiverPhone.slice(-10), 'consignment_no');
