@@ -95,7 +95,10 @@ export const generateQueryReplies = async function(queryString, receiverPhone){
                 const result2 = await getDataFromSheetByOrderId('Logistics', data, receiverPhone.slice(-10), 'customer_phone, expected_shipping_date');
                 // console.log(result2);
                 if(result2.dataFound){
-                    return `Your order is expected to be shipped on ${result2.data.expected_shipping_date}. You’ll get a tracking ID via sms, email and WhatsApp once it ships.`  + "\n\n" + disclaimer;
+                    if(result2.data.expected_shipping_date)
+                        return `Your order is expected to be shipped on ${result2.data.expected_shipping_date}. You’ll get a tracking ID via sms, email and WhatsApp once it ships.`  + "\n\n" + disclaimer;
+                    else 
+                        return `Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.` + "\n\n" + disclaimer;
                 }
                 else{
                     return `Sorry, the order details of the given order ID is not available. Please make sure that you are chatting with the same number you gave in the checkout section or in the shipment section. If you want to check the order IDs of the orders you have placed, please use query 3.` + "\n\n" + disclaimer;
